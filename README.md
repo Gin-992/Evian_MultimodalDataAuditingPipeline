@@ -28,39 +28,7 @@ EVIAN audits visual instruction-tuning data with a decomposition-then-evaluation
 `-- README.md
 ```
 
-## Installation
-
-```bash
-git clone <repo-url>
-cd Evian_MultimodalDataAuditingPipeline
-python -m venv .venv
-source .venv/bin/activate
-pip install -U pip
-pip install -r requirements.txt
-```
-
-`requirements.txt` records the full GPU experiment environment. For a smaller environment, install the packages needed by the scripts you run, such as `openai`, `tqdm`, `pillow`, `torch`, `transformers`, and `vllm`. LAVIS baselines also require the LAVIS package.
-
-## Data Format
-
-Input files use a LLaVA-style JSON list. Image paths are resolved relative to the image directory passed to scoring scripts.
-
-```json
-[
-  {
-    "id": "sample_000001",
-    "image": "relative/path/to/image.jpg",
-    "conversations": [
-      {"from": "human", "value": "Describe the image."},
-      {"from": "gpt", "value": "A person is standing beside a red car."}
-    ]
-  }
-]
-```
-
 ## Model Services
-
-EVIAN uses OpenAI-compatible chat-completion endpoints. The LLM endpoint handles response decomposition and controlled defect injection. The VLM endpoint scores Image-Text Consistency, Logical Coherence, and Factual Accuracy.
 
 ```bash
 export LLM_BASE_URL=http://localhost:8000/v1
@@ -70,29 +38,9 @@ export LLM_MODEL=Qwen/Qwen2.5-32B-Instruct-AWQ
 export VLM_MODEL=Qwen/Qwen2.5-VL-7B-Instruct-AWQ
 ```
 
-For paper-setting reproduction, set `LLM_MODEL` to `Qwen3-235B-A22B-Instruct-2507-FP8` or the corresponding local path, and set `VLM_MODEL` to `Qwen2.5-VL-7B-Instruct-AWQ`. The scripts accept local model paths or model identifiers supported by your serving backend.
+## Step-by-Step
 
-## End-to-End Local Run
-
-Run this from the repository root when you want the script to launch local vLLM servers. Override GPUs, ports, model paths, and data paths as needed.
-
-```bash
-LLM_GPU=0 \
-VLM_GPU=1 \
-LLM_PORT=8000 \
-VLM_PORT=8001 \
-IMG_DIR=/path/to/images \
-GOOD_DATA_JSON=/path/to/high_quality.json \
-ORIGINAL_DATA_JSON=/path/to/original_dataset.json \
-FINAL_OUTPUT_DIR=/path/to/outputs \
-bash src/run_pipeline.sh
-```
-
-The script generates low-quality samples, combines them with high-quality samples, scores the combined set, and exports the top-ranked subset.
-
-## Step-by-Step Main Pipeline
-
-Run these commands from `src` so that `mm_pipeline` and `configs` are importable.
+Run these commands from `src`.
 
 ```bash
 cd src
@@ -227,21 +175,12 @@ python aggregate_results.py \
   --top_n 10000
 ```
 
-To run all ablation modes with local vLLM services, return to the repository root, set `INPUT_JSON`, `IMG_DIR`, `LLM_MODEL`, and `VLM_MODEL`, then run:
+To run all ablation modes with local vLLM services, return to the repository root, then run:
 
 ```bash
 cd /path/to/Evian_MultimodalDataAuditingPipeline
 bash ablation/launch_job_ablation.sh
 ```
-
-## Reproducibility Notes
-
-- Set `OPENAI_API_KEY`, `LLM_BASE_URL`, `VLM_BASE_URL`, `LLM_MODEL`, and `VLM_MODEL` before API-based stages.
-- `src/run_pipeline.sh`, `baseline/launch.sh`, and `ablation/launch_job_ablation.sh` launch local vLLM servers; use the step-by-step commands when services are already running.
-- `batch_size` controls both batch size and request concurrency in the main pipeline.
-- The default no-content score for missing `<INFER>` or `<KNOW>` spans is 2, matching the paper rubric.
-- Intermediate JSON files, logs, and model weights are ignored by Git.
-- Large generated datasets and model checkpoints should be released separately from the source code.
 
 ## Citation
 
