@@ -41,7 +41,7 @@ DEFAULT_NUM_WORKERS = 16
 # sa_sb  : 只保留visual score
 # sb     : 去掉knowledge score
 # sa     : 去掉inference score
-# full   : 完整版（以后你想开源完整版时可直接打开）
+# full   : 完整版
 # =========================
 ABLATION_MODES = {
     "phase": {
