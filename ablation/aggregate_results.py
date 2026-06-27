@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from typing import List, Dict
 
 
@@ -11,6 +12,7 @@ def load_json(path: str):
 
 
 def save_json(obj, path: str) -> None:
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2, ensure_ascii=False)
 

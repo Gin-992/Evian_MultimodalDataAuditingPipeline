@@ -117,7 +117,7 @@ def process_batches(
         finally:
             gc.collect()
 
-    if processed_batches_since_last_save > 0:
+    if processed_batches_since_last_save > 0 or not os.path.exists(output_full_scored_path):
         save_progress(processed_data, output_full_scored_path)
 
 

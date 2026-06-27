@@ -7,9 +7,9 @@ import os
 # =========================
 CODE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-INPUT_JSON = "/root/to/EVIAN_MutimodalDataAuditing/combined_data_350k_cleaned.json"
-IMG_DIR = "/root/to/MMDS-DataPool/images"
-OUTPUT_DIR = os.path.join(CODE_DIR, "final_results")
+INPUT_JSON = os.getenv("INPUT_JSON", "/path/to/combined_data.json")
+IMG_DIR = os.getenv("IMG_DIR", "/path/to/images")
+OUTPUT_DIR = os.getenv("OUTPUT_DIR", os.path.join(CODE_DIR, "final_results"))
 
 # =========================
 # 模型服务配置

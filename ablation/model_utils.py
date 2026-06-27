@@ -12,15 +12,18 @@ VLM_MODEL_NAME = os.getenv("VLM_MODEL", "Qwen/Qwen2.5-VL-7B-Instruct")
 
 LLM_PORT = os.getenv("LLM_PORT", "8000")
 VLM_PORT = os.getenv("VLM_PORT", "8001")
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", f"http://localhost:{LLM_PORT}/v1")
+VLM_BASE_URL = os.getenv("VLM_BASE_URL", f"http://localhost:{VLM_PORT}/v1")
+API_KEY = os.getenv("OPENAI_API_KEY", "vllm")
 
 llm_client = openai.OpenAI(
-    base_url=f"http://localhost:{LLM_PORT}/v1",
-    api_key="vllm",
+    base_url=LLM_BASE_URL,
+    api_key=API_KEY,
 )
 
 vlm_client = openai.OpenAI(
-    base_url=f"http://localhost:{VLM_PORT}/v1",
-    api_key="vllm",
+    base_url=VLM_BASE_URL,
+    api_key=API_KEY,
 )
 
 

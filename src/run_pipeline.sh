@@ -1,20 +1,22 @@
 #!/bin/bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
 # =========================
 # User-configurable paths
 # =========================
-REPO_DIR="/root/to/your_repo"
-IMG_DIR="/root/to/DataPool/images"
+IMG_DIR="${IMG_DIR:-/path/to/DataPool/images}"
 
-GOOD_DATA_JSON="/root/to/MM-Score-Top50K-clean.json"
-ORIGINAL_DATA_JSON="/root/to/DataPool/sampled_mmds_anno.json"
-LOW_QUALITY_DATA_JSON="/root/to/DataPool/generated/low_quality_250k.json"
+GOOD_DATA_JSON="${GOOD_DATA_JSON:-/path/to/MM-Score-Top50K-clean.json}"
+ORIGINAL_DATA_JSON="${ORIGINAL_DATA_JSON:-/path/to/DataPool/sampled_mmds_anno.json}"
 
-FINAL_OUTPUT_DIR="/root/to/DataPool/final_results"
-COMBINED_DATA_JSON="${FINAL_OUTPUT_DIR}/combined_data_300k.json"
-SCORED_DATA_JSON="${FINAL_OUTPUT_DIR}/scored_data_300k.json"
-FINAL_TOP_N_JSON="${FINAL_OUTPUT_DIR}/top_10000_dataset.json"
+FINAL_OUTPUT_DIR="${FINAL_OUTPUT_DIR:-${PROJECT_ROOT}/outputs/evian}"
+LOW_QUALITY_DATA_JSON="${LOW_QUALITY_DATA_JSON:-${FINAL_OUTPUT_DIR}/low_quality_250k.json}"
+COMBINED_DATA_JSON="${COMBINED_DATA_JSON:-${FINAL_OUTPUT_DIR}/combined_data_300k.json}"
+SCORED_DATA_JSON="${SCORED_DATA_JSON:-${FINAL_OUTPUT_DIR}/scored_data_300k.json}"
+FINAL_TOP_N_JSON="${FINAL_TOP_N_JSON:-${FINAL_OUTPUT_DIR}/top_10000_dataset.json}"
 
 LLM_LOG_FILE="${FINAL_OUTPUT_DIR}/llm_server.log"
 VLM_LOG_FILE="${FINAL_OUTPUT_DIR}/vlm_server.log"
@@ -22,11 +24,11 @@ VLM_LOG_FILE="${FINAL_OUTPUT_DIR}/vlm_server.log"
 # =========================
 # Model / API config
 # =========================
-export LLM_MODEL="/root/to/Qwen2.5-32B-Instruct-AWQ"
-export VLM_MODEL="/root/to/Qwen2.5-VL-7B-Instruct-AWQ"
-export LLM_BASE_URL="http://localhost:8000/v1"
-export VLM_BASE_URL="http://localhost:8001/v1"
-export OPENAI_API_KEY="vllm"
+export LLM_MODEL="${LLM_MODEL:-Qwen/Qwen2.5-32B-Instruct-AWQ}"
+export VLM_MODEL="${VLM_MODEL:-Qwen/Qwen2.5-VL-7B-Instruct-AWQ}"
+export LLM_BASE_URL="${LLM_BASE_URL:-http://localhost:8000/v1}"
+export VLM_BASE_URL="${VLM_BASE_URL:-http://localhost:8001/v1}"
+export OPENAI_API_KEY="${OPENAI_API_KEY:-vllm}"
 
 cleanup() {
     echo "[Cleanup] stopping background services..."
@@ -47,8 +49,8 @@ trap cleanup EXIT
 mkdir -p "${FINAL_OUTPUT_DIR}"
 mkdir -p "$(dirname "${LOW_QUALITY_DATA_JSON}")"
 
-cd "${REPO_DIR}"
-export PYTHONPATH="${REPO_DIR}:${PYTHONPATH:-}"
+cd "${SCRIPT_DIR}"
+export PYTHONPATH="${SCRIPT_DIR}:${PYTHONPATH:-}"
 
 echo "=================================================="
 echo "Pipeline start: $(date)"

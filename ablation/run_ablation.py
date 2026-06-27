@@ -315,6 +315,7 @@ def load_json(path: str):
 
 
 def save_json(obj, path: str) -> None:
+    os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(obj, f, indent=2, ensure_ascii=False)
 
@@ -505,6 +506,7 @@ def run(
 
     if not dataset_to_score:
         print("Nothing to do. All records are already scored.")
+        save_json(existing_results, output_json)
         return
 
     print(f"Mode = {mode}")
@@ -536,7 +538,8 @@ def run(
 
     final_dict = {x["id"]: x for x in existing_results if "id" in x}
     for x in new_results:
-        final_dict[x["id"]] = x
+        if "id" in x:
+            final_dict[x["id"]] = x
 
     final_results = list(final_dict.values())
     save_json(final_results, output_json)

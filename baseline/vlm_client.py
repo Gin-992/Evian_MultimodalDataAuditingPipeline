@@ -13,7 +13,7 @@ LLM_MODEL_NAME = os.getenv("LLM_MODEL", "Qwen/Qwen2.5-32B-Instruct")
 
 VLM_BASE_URL = os.getenv("VLM_BASE_URL", "http://127.0.0.1:8001/v1")
 LLM_BASE_URL = os.getenv("LLM_BASE_URL", "http://127.0.0.1:8000/v1")
-API_KEY = os.getenv("VLM_API_KEY", "vllm")
+API_KEY = os.getenv("VLM_API_KEY", os.getenv("OPENAI_API_KEY", "vllm"))
 TIMEOUT = int(os.getenv("VLM_TIMEOUT", "500"))
 
 llm_client = OpenAI(
