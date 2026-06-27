@@ -24,10 +24,15 @@ VLM_LOG_FILE="${FINAL_OUTPUT_DIR}/vlm_server.log"
 # =========================
 # Model / API config
 # =========================
+LLM_GPU="${LLM_GPU:-0}"
+VLM_GPU="${VLM_GPU:-1}"
+LLM_PORT="${LLM_PORT:-8000}"
+VLM_PORT="${VLM_PORT:-8001}"
+
 export LLM_MODEL="${LLM_MODEL:-Qwen/Qwen2.5-32B-Instruct-AWQ}"
 export VLM_MODEL="${VLM_MODEL:-Qwen/Qwen2.5-VL-7B-Instruct-AWQ}"
-export LLM_BASE_URL="${LLM_BASE_URL:-http://localhost:8000/v1}"
-export VLM_BASE_URL="${VLM_BASE_URL:-http://localhost:8001/v1}"
+export LLM_BASE_URL="${LLM_BASE_URL:-http://localhost:${LLM_PORT}/v1}"
+export VLM_BASE_URL="${VLM_BASE_URL:-http://localhost:${VLM_PORT}/v1}"
 export OPENAI_API_KEY="${OPENAI_API_KEY:-vllm}"
 
 cleanup() {
@@ -57,20 +62,20 @@ echo "Pipeline start: $(date)"
 echo "=================================================="
 
 echo "[1/5] Launching LLM server..."
-CUDA_VISIBLE_DEVICES=0 vllm serve "${LLM_MODEL}" \
+CUDA_VISIBLE_DEVICES="${LLM_GPU}" vllm serve "${LLM_MODEL}" \
     --max-model-len 4096 \
     --trust-remote-code \
     --gpu-memory-utilization 0.90 \
-    --port 8000 > "${LLM_LOG_FILE}" 2>&1 &
+    --port "${LLM_PORT}" > "${LLM_LOG_FILE}" 2>&1 &
 LLM_PID=$!
 sleep 30
 
 echo "[2/5] Launching VLM server..."
-CUDA_VISIBLE_DEVICES=1 vllm serve "${VLM_MODEL}" \
+CUDA_VISIBLE_DEVICES="${VLM_GPU}" vllm serve "${VLM_MODEL}" \
     --max-model-len 12288 \
     --trust-remote-code \
     --gpu-memory-utilization 0.90 \
-    --port 8001 > "${VLM_LOG_FILE}" 2>&1 &
+    --port "${VLM_PORT}" > "${VLM_LOG_FILE}" 2>&1 &
 VLM_PID=$!
 sleep 50
 

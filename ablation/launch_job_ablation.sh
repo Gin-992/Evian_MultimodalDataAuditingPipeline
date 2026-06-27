@@ -7,8 +7,8 @@ OUTPUT_DIR="${CODE_DIR}/final_results"
 export PYTHONPATH="${CODE_DIR}:${PYTHONPATH:-}"
 
 # 可按需覆盖
-export LLM_MODEL="${LLM_MODEL:-/root/to/Qwen2.5-32B-Instruct-AWQ}"
-export VLM_MODEL="${VLM_MODEL:-/root/to/Qwen2.5-VL-7B-Instruct-AWQ}"
+export LLM_MODEL="${LLM_MODEL:-Qwen/Qwen2.5-32B-Instruct-AWQ}"
+export VLM_MODEL="${VLM_MODEL:-Qwen/Qwen2.5-VL-7B-Instruct-AWQ}"
 export LLM_PORT="${LLM_PORT:-8000}"
 export VLM_PORT="${VLM_PORT:-8001}"
 export LLM_GPU="${LLM_GPU:-0}"

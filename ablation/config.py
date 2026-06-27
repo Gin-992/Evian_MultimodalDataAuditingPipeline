@@ -14,8 +14,8 @@ OUTPUT_DIR = os.getenv("OUTPUT_DIR", os.path.join(CODE_DIR, "final_results"))
 # =========================
 # 模型服务配置
 # =========================
-LLM_MODEL = os.getenv("LLM_MODEL", "/root/to/Qwen2.5-32B-Instruct-AWQ")
-VLM_MODEL = os.getenv("VLM_MODEL", "/root/to/Qwen2.5-VL-7B-Instruct-AWQ")
+LLM_MODEL = os.getenv("LLM_MODEL", "Qwen/Qwen2.5-32B-Instruct-AWQ")
+VLM_MODEL = os.getenv("VLM_MODEL", "Qwen/Qwen2.5-VL-7B-Instruct-AWQ")
 
 LLM_PORT = int(os.getenv("LLM_PORT", "8000"))
 VLM_PORT = int(os.getenv("VLM_PORT", "8001"))
