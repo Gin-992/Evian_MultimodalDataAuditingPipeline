@@ -1,17 +1,20 @@
-# EVIAN: Explainable Visual Instruction-tuning Data Auditing
+# EVIAN: Explainable Visual Instruction-Tuning Data Auditing
 
-Official implementation of **EVIAN: Towards Explainable Visual Instruction-tuning Data Auditing**.
+Official implementation of **EVIAN: Towards Explainable Visual Instruction-Tuning Data Auditing**.
 
-EVIAN audits visual instruction-tuning data with a decomposition-then-evaluation pipeline. It separates each response into visual description, subjective inference, and factual claim components, then evaluates them along three dimensions: Image-Text Consistency, Logical Coherence, and Factual Accuracy.
+EVIAN is a data auditing pipeline for visual instruction-tuning datasets. Given an image-instruction-response sample, EVIAN decomposes the response into visually grounded descriptions, subjective or logical inferences, and external factual claims. It then evaluates the sample from three complementary perspectives: **Image-Text Consistency**, **Logical Coherence**, and **Factual Accuracy**.
+
+The resulting scores can be used to rank, filter, and select high-quality visual instruction-tuning data.
 
 ## Highlights
 
-- Fine-grained auditing for image-instruction-response data.
-- Three-stage response decomposition: semantic tagging, visual distillation, and fluent visual synthesis.
-- Multi-dimensional scoring with OpenAI-compatible LLM and VLM endpoints.
-- Dataset ranking and top-k selection through a composite quality score.
-- Baseline scripts for random sampling, CLIP, LAVIS, and VLM-judge scoring.
-- Ablation scripts for evaluating the contribution of decomposition and score dimensions.
+* Fine-grained auditing for image-instruction-response data.
+* Explainable response decomposition into visual, inferential, and factual components.
+* Three-stage decomposition pipeline: semantic tagging, visual distillation, and fluent visual synthesis.
+* Multi-dimensional scoring with OpenAI-compatible LLM and VLM endpoints.
+* Composite quality score for dataset ranking and top-k sample selection.
+* Baselines including random sampling, CLIP ranking, LAVIS-based scoring, and VLM-judge scoring.
+* Ablation scripts for analyzing the contribution of decomposition and individual score dimensions.
 
 ## Repository Structure
 
@@ -24,11 +27,13 @@ EVIAN audits visual instruction-tuning data with a decomposition-then-evaluation
 |   `-- run_pipeline.sh     # End-to-end local vLLM launcher
 |-- baseline/               # Random, CLIP, LAVIS, and VLM-judge baselines
 |-- ablation/               # Ablation runner and aggregation scripts
-|-- requirements.txt        # Full experiment environment snapshot
+|-- requirements.txt        # Experiment environment snapshot
 `-- README.md
 ```
 
 ## Model Services
+
+Set the LLM and VLM service endpoints before running the pipeline:
 
 ```bash
 export LLM_BASE_URL=http://localhost:8000/v1
@@ -38,16 +43,39 @@ export LLM_MODEL=Qwen/Qwen2.5-32B-Instruct-AWQ
 export VLM_MODEL=Qwen/Qwen2.5-VL-7B-Instruct-AWQ
 ```
 
-## Step-by-Step
+## Pipeline Overview
 
-Run these commands from `src`.
+EVIAN follows a decomposition-then-evaluation workflow:
+
+1. **Semantic tagging**
+   The response is tagged into visually grounded descriptions, subjective or logical inferences, and external factual claims.
+
+2. **Visual distillation**
+   Non-visual or weakly grounded content is removed or rewritten to obtain a cleaner visual response.
+
+3. **Fluent visual synthesis**
+   The distilled visual content is rewritten into a fluent visual-only summary.
+
+4. **Multi-dimensional scoring**
+   The sample is scored along three dimensions:
+
+   * **Image-Text Consistency**
+   * **Logical Coherence**
+   * **Factual Accuracy**
+
+5. **Dataset ranking and selection**
+   The final composite score is used to rank the dataset and select high-quality samples.
+
+## Step-by-Step Usage
+
+Run the following commands from the `src` directory:
 
 ```bash
 cd src
 export PYTHONPATH=$PWD
 ```
 
-Generate synthetic low-quality responses:
+### 1. Generate synthetic low-quality responses
 
 ```bash
 python scripts/generate_low_quality.py \
@@ -57,7 +85,7 @@ python scripts/generate_low_quality.py \
   --batch_size 128
 ```
 
-Combine high-quality and generated low-quality data:
+### 2. Combine high-quality and generated low-quality data
 
 ```bash
 python scripts/prepare_dataset.py \
@@ -68,7 +96,7 @@ python scripts/prepare_dataset.py \
   --seed 42
 ```
 
-Score the combined dataset:
+### 3. Score the combined dataset
 
 ```bash
 python scripts/score_dataset.py \
@@ -78,7 +106,7 @@ python scripts/score_dataset.py \
   --batch_size 128
 ```
 
-Select the top-ranked samples:
+### 4. Select top-ranked samples
 
 ```bash
 python scripts/aggregate_results.py \
@@ -89,21 +117,23 @@ python scripts/aggregate_results.py \
 
 ## Output Fields
 
-Scored samples include the original data fields plus audit metadata:
+Each scored sample contains the original data fields together with EVIAN audit metadata:
 
-- `step1_marked_response`: response with `<INFER>` and `<KNOW>` spans.
-- `step2_cleaned_response`: response after removing or rewriting non-visual content.
-- `final_visual_summary`: visual-only summary used for image-text consistency scoring.
-- `visual_consistency_score_str`: VLM judgment for Image-Text Consistency.
-- `inference_correctness_score_str`: VLM judgment for Logical Coherence.
-- `external_knowledge_correctness_score_str`: VLM judgment for Factual Accuracy.
-- `composite_score`: average of Image-Text Consistency, Logical Coherence, and Factual Accuracy.
+| Field                                      | Description                                                                           |
+| ------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `step1_marked_response`                    | Response with `<INFER>` and `<KNOW>` spans.                                           |
+| `step2_cleaned_response`                   | Response after removing or rewriting non-visual content.                              |
+| `final_visual_summary`                     | Visual-only summary used for image-text consistency scoring.                          |
+| `visual_consistency_score_str`             | VLM judgment for Image-Text Consistency.                                              |
+| `inference_correctness_score_str`          | VLM judgment for Logical Coherence.                                                   |
+| `external_knowledge_correctness_score_str` | VLM judgment for Factual Accuracy.                                                    |
+| `composite_score`                          | Average score across Image-Text Consistency, Logical Coherence, and Factual Accuracy. |
 
 ## Baselines
 
 Run baseline commands from the repository root.
 
-Random sampling:
+### Random Sampling
 
 ```bash
 python baseline/random_sampling.py \
@@ -113,7 +143,7 @@ python baseline/random_sampling.py \
   --seed 42
 ```
 
-CLIP ranking:
+### CLIP Ranking
 
 ```bash
 python baseline/clip_ranker.py \
@@ -124,7 +154,7 @@ python baseline/clip_ranker.py \
   --top_n 10000
 ```
 
-VLM-judge baseline:
+### VLM-Judge Baseline
 
 ```bash
 INPUT_JSON=/path/to/data.json \
@@ -133,7 +163,7 @@ OUTPUT_DIR=/path/to/baseline_outputs \
 bash baseline/launch.sh
 ```
 
-LAVIS baselines:
+### LAVIS Baselines
 
 ```bash
 JSON_PATH=/path/to/data.json \
@@ -149,6 +179,7 @@ Run a single ablation mode from the `ablation` directory:
 ```bash
 cd ablation
 export PYTHONPATH=$PWD
+
 python run_ablation.py \
   --mode sa \
   --input_json /path/to/combined_data.json \
@@ -160,11 +191,13 @@ python run_ablation.py \
 
 Available modes:
 
-- `phase`: score the original response without decomposition.
-- `sa_sb`: use only Image-Text Consistency.
-- `sb`: remove Factual Accuracy.
-- `sa`: remove Logical Coherence.
-- `full`: use all EVIAN score dimensions.
+| Mode    | Description                                        |
+| ------- | -------------------------------------------------- |
+| `phase` | Score the original response without decomposition. |
+| `sa_sb` | Use only Image-Text Consistency.                   |
+| `sb`    | Remove Factual Accuracy.                           |
+| `sa`    | Remove Logical Coherence.                          |
+| `full`  | Use all EVIAN score dimensions.                    |
 
 Aggregate ablation results:
 
@@ -175,7 +208,7 @@ python aggregate_results.py \
   --top_n 10000
 ```
 
-To run all ablation modes with local vLLM services, return to the repository root, then run:
+To run all ablation modes with local vLLM services, return to the repository root and run:
 
 ```bash
 cd /path/to/Evian_MultimodalDataAuditingPipeline
@@ -183,6 +216,8 @@ bash ablation/launch_job_ablation.sh
 ```
 
 ## Citation
+
+If you find this repository useful, please cite our paper:
 
 ```bibtex
 @inproceedings{jia-etal-2026-evian,
